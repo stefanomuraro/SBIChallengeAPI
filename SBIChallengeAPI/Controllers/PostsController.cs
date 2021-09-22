@@ -1,12 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using System.Net.Http;
-using Newtonsoft.Json;
-using AutoMapper;
+using System.Threading;
+using MediatR;
+using SBIChallengeAPI.Requests;
+using SBIChallengeAPI.Models;
 
 namespace SBIChallengeAPI.Controllers
 {
@@ -14,45 +11,25 @@ namespace SBIChallengeAPI.Controllers
     [ApiController]
     public class PostsController : ControllerBase
     {
-        private readonly IMapper _mapper;
-        private readonly HttpClient _client = new();
+        private readonly IMediator _mediator;
 
-        public PostsController(IMapper mapper)
+        public PostsController(IMediator mediator)
         {
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAsync([FromQuery] int id)
+        public async Task<IActionResult> GetPostById([FromQuery] int id, CancellationToken cancellationToken)
         {
-            Salida post = await ObtenerPost(id);
+            Salida post = await _mediator.Send(new GetPostById(id), cancellationToken);
 
-            if(post == null)
+            if (post == null)
             {
                 var nf = NotFound("El post " + id + " no existe.");
                 return nf;
             }
 
             return Ok(post);
-        }
-
-        private async Task<Salida> ObtenerPost(int id)
-        {
-            var path = "https://jsonplaceholder.typicode.com/posts/";
-            HttpResponseMessage response = await _client.GetAsync(path);
-            if (response.IsSuccessStatusCode)
-            {
-                string json = await response.Content.ReadAsStringAsync();
-                ServerPost[] posts = JsonConvert.DeserializeObject<ServerPost[]>(json);
-                foreach (ServerPost post in posts)
-                {
-                    if (post.Id == id)
-                    {
-                        return _mapper.Map<Salida>(post);
-                    }
-                }
-            }
-            return null;
         }
     }
 }

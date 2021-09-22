@@ -1,4 +1,4 @@
-﻿namespace SBIChallengeAPI
+﻿namespace SBIChallengeAPI.Models
 {
     public class Salida
     {

@@ -22,20 +22,21 @@ namespace SBIChallengeAPI.Requests
     public class GetPostByIdHandler : IRequestHandler<GetPostById, Salida>
     {
         private readonly IMapper _mapper;
-        private readonly HttpClient _client = new();
+        private readonly HttpClient _client;
 
-        public GetPostByIdHandler(IMapper mapper)
+        public GetPostByIdHandler(IMapper mapper, HttpClient client)
         {
             _mapper = mapper;
+            _client = client;
         }
 
         public async Task<Salida> Handle(GetPostById request, CancellationToken cancellationToken)
         {
             var path = "https://jsonplaceholder.typicode.com/posts/";
-            HttpResponseMessage response = await _client.GetAsync(path);
+            HttpResponseMessage response = await _client.GetAsync(path, cancellationToken);
             if (response.IsSuccessStatusCode)
             {
-                string json = await response.Content.ReadAsStringAsync();
+                string json = await response.Content.ReadAsStringAsync(cancellationToken);
                 ServerPost[] posts = JsonConvert.DeserializeObject<ServerPost[]>(json);
                 foreach (ServerPost post in posts)
                 {

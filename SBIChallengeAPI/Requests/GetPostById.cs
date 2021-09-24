@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using MediatR;
-using Newtonsoft.Json;
 using SBIChallengeAPI.Models;
+using SBIChallengeAPI.Services;
 
 namespace SBIChallengeAPI.Requests
 {
@@ -21,32 +19,16 @@ namespace SBIChallengeAPI.Requests
 
     public class GetPostByIdHandler : IRequestHandler<GetPostById, Salida>
     {
-        private readonly IMapper _mapper;
-        private readonly HttpClient _client;
+        private readonly IPostsService _postsService;
 
-        public GetPostByIdHandler(IMapper mapper, HttpClient client)
+        public GetPostByIdHandler(IPostsService postsService)
         {
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _postsService = postsService ?? throw new ArgumentNullException(nameof(postsService));
         }
 
         public async Task<Salida> Handle(GetPostById request, CancellationToken cancellationToken)
         {
-            var path = "https://jsonplaceholder.typicode.com/posts/";
-            HttpResponseMessage response = await _client.GetAsync(path, cancellationToken);
-            if (response.IsSuccessStatusCode)
-            {
-                string json = await response.Content.ReadAsStringAsync(cancellationToken);
-                ServerPost[] posts = JsonConvert.DeserializeObject<ServerPost[]>(json);
-                foreach (ServerPost post in posts)
-                {
-                    if (post.Id == request.Id)
-                    {
-                        return _mapper.Map<Salida>(post);
-                    }
-                }
-            }
-            return null;
+            return await _postsService.GetPostById(request.Id);
         }
     }
 }

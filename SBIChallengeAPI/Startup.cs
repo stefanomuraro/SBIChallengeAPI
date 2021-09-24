@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MediatR;
 using System.Net.Http;
+using SBIChallengeAPI.Services;
 
 namespace SBIChallengeAPI
 {
@@ -30,6 +31,7 @@ namespace SBIChallengeAPI
             services.AddAutoMapper(typeof(Startup));
             services.AddMediatR(typeof(Startup));
             services.AddSingleton(new HttpClient());
+            services.AddScoped<IPostsService, PostsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

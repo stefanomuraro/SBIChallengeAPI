@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -16,7 +17,6 @@ namespace SBIChallengeAPI.Requests
         {
             Id = id;
         }
-
     }
 
     public class GetPostByIdHandler : IRequestHandler<GetPostById, Salida>
@@ -26,8 +26,8 @@ namespace SBIChallengeAPI.Requests
 
         public GetPostByIdHandler(IMapper mapper, HttpClient client)
         {
-            _mapper = mapper;
-            _client = client;
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         public async Task<Salida> Handle(GetPostById request, CancellationToken cancellationToken)

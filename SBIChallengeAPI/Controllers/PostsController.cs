@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Threading;
 using MediatR;
@@ -15,21 +16,14 @@ namespace SBIChallengeAPI.Controllers
 
         public PostsController(IMediator mediator)
         {
-            _mediator = mediator;
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         [HttpGet]
         public async Task<IActionResult> GetPostById([FromQuery] int id, CancellationToken cancellationToken)
         {
             Salida post = await _mediator.Send(new GetPostById(id), cancellationToken);
-
-            if (post == null)
-            {
-                var nf = NotFound("El post " + id + " no existe.");
-                return nf;
-            }
-
-            return Ok(post);
+            return post != null ? Ok(post) : NotFound("El post " + id + " no existe.");
         }
     }
 }
